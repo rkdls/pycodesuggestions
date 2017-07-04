@@ -59,19 +59,27 @@ class Batcher:
         for i in range(n):
             x_arr = np.zeros([self.seq_length, self.batch_size])
             y_arr = np.zeros([self.seq_length, self.batch_size])
-            masks_arr = np.zeros([self.seq_length, self.batch_size, 1])
+            # masks_arr = np.zeros([self.seq_length, self.batch_size, 1])
+            masks_arr = np.zeros([self.seq_length, self.batch_size, 5])
             identifier_usages = np.zeros([self.batch_size, self.seq_length])
             actual_lengths = np.zeros([self.batch_size])
             for j in range(self.batch_size):
                 length = 0
                 if j < len(batch) and batch[j].num_sequences > i:
                     length = batch[j].actual_lengths[i]
+
+                    # if length == 1:
+                    #     continue  # length가 1인부분은 그냥 넘어간다.
+
                     x_arr[0:length, j] = np.transpose(batch[j].inputs[i][0:length])
                     y_arr[0:length, j] = np.transpose(batch[j].targets[i][0:length])
                     if hasattr(batch[j], "var_flags"):
                         masks_arr[0:length, j] = np.transpose(
                             attention_masks(1, batch[j].var_flags[i], length))
                     else:
+                        # print('j', j, 'masks_arr[0:length, j, :]', masks_arr[0:length, j, :])
+                        # print('shape', masks_arr[0:length, j, :].shape)
+
                         masks_arr[0:length, j, :] = attention_masks(1, batch[j].masks[i], length)
 
                     identifier_usages[j, 0:length] = batch[j].identifier_usage[i][0:length]

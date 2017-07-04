@@ -3,7 +3,11 @@ import tensorflow as tf
 
 
 def attention_masks(attns, masks, length):
-    lst = [np.ones([1, length])]
+    # lst = [np.ones([1, length])]
+    lst=[]
+    # print('masks.shape', masks.shape, 'masks', masks)
+    # lst.append(masks[:, 0:length] if len(masks.shape) == 2 else np.reshape(masks[0:length], [1, length]))
+    lst.append(masks[:, 0:length] if len(masks.shape) == 2 else np.reshape(masks[0:length], [length, 1]))
     return np.transpose(np.concatenate(lst)) if lst else np.zeros([0, length])
 
 
@@ -118,7 +122,20 @@ class AttentionCell(tf.nn.rnn_cell.RNNCell):
     def _lambda(self, state, att_outputs, lm_input, num_tasks=None):
         num_tasks = num_tasks or self._num_tasks
         with tf.variable_scope("Lambda"):
-            return tf.ones([tf.shape(state)[0], num_tasks])
+
+            lambda_state = []
+
+            lambda_state.append(state)
+
+            lambda_state.extend(att_outputs)
+
+            lambda_state.append(lm_input)
+
+            size = self._size * len(lambda_state)
+            w_lambda = tf.get_variable("W_lambda", [size, num_tasks])
+            b_lambda = tf.get_variable("b_lambda", [num_tasks])
+            state = tf.concat(axis=1, values=lambda_state)
+            return tf.nn.softmax(tf.matmul(state, w_lambda) + b_lambda)
 
     def _attention_states(self, attn_input, attn_ids, attn_count, lm_input, mask, raw_inputs):
         new_attn_input = tf.concat(axis=1, values=[
