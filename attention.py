@@ -325,7 +325,7 @@ if __name__ == '__main__':
     # num_samples = 0
     # attns = 1
     data_path = 'data_samples/mapping.map'
-    num_samples = 3
+    num_samples = 100
     # attention_num = 5
     max_attention = 3
     lambda_type = 'state'

@@ -67,6 +67,7 @@ class AttentionCell(tf.nn.rnn_cell.RNNCell):
 
             state = state[0]
             lm_input = inputs[:, 0:self._size]
+            # seq_length, batch, attention_length(5)
             masks = [tf.squeeze(tf.cast(inputs[:, self._size + i:self._size + i + 1], tf.bool), [1])
                      for i in range(self._num_attns)]
             raw_input = inputs[:, self._size + self._num_attns]
