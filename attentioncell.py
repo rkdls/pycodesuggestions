@@ -84,8 +84,8 @@ class AttentionCell(tf.nn.rnn_cell.RNNCell):
 
             lmda = self._lambda(h, attn_outputs, lm_input)
 
-            outputs = [self._lm_output(lm_output)]
-            outputs.extend(attn_outputs)
+            # outputs = [self._lm_output(lm_output)]
+            # outputs.extend(attn_outputs)
 
             # final_output = self._weighted_output(lm_output, attn_outputs, lmda)
             final_output = lm_output
@@ -111,7 +111,9 @@ class AttentionCell(tf.nn.rnn_cell.RNNCell):
                    tf.transpose(tf.stack(attn_ids), [1, 0, 2]), lmda, states
 
     def _state(self, lm_output, state):
+
         fully_connected = tf.contrib.layers.fully_connected(tf.concat(axis=1, values=state[-1]), self._size)
+        print('intha state before fully connected ', state, state[-1], tf.concat(axis=1, values=state[-1]), fully_connected)
         return fully_connected
 
     def _lm_output(self, lm_output):
@@ -166,7 +168,7 @@ class AttentionCell(tf.nn.rnn_cell.RNNCell):
             M = tf.tanh(m1 + m2)  # (batch*k, size)
             alpha = tf.reshape(tf.matmul(M, w), [-1, self._attn_length])  # (batch, k)
             alpha = tf.nn.softmax(alpha)
-            alpha_shaped = tf.expand_dims(alpha, 2)  # (batch, k, 1)
+            alpha_shaped = tf.expand_dims(alpha, 2)  # (batch, attention_length, 1)
 
             attn_vec = tf.reduce_sum(attn_input * alpha_shaped, 1)
             attn_vec = tf.contrib.layers.fully_connected(attn_vec, self._size)
